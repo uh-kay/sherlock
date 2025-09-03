@@ -4,7 +4,25 @@ const sidebarElement = document.getElementById("sidebar");
 const tableElement = document.getElementById("table");
 const structureButton = document.getElementById("structure-btn");
 const dataButton = document.getElementById("data-btn");
+const toolbar = structureButton ? structureButton.parentElement : null;
 
+function updateToolbarOffset() {
+  if (!sidebarElement || !toolbar) return;
+  const w = sidebarElement.offsetWidth || 0;
+  if (getComputedStyle(toolbar).position === "absolute") {
+    toolbar.style.left = w + "px";
+    toolbar.style.width = `calc(100vw - ${w}px)`;
+    toolbar.style.marginLeft = ""; 
+  }
+}
+
+window.addEventListener("load", () => requestAnimationFrame(updateToolbarOffset));
+window.addEventListener("resize", updateToolbarOffset);
+
+if (window.ResizeObserver && sidebarElement) {
+  const ro = new ResizeObserver(() => updateToolbarOffset());
+  ro.observe(sidebarElement);
+}
 let currentTable = null; // Track the currently selected table
 
 // Load table list
