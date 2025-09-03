@@ -1,0 +1,16 @@
+package views
+
+import "sqlexplorer/views/components"
+
+templ Index() {
+	<html lang="en">
+		@components.Header()
+		<body class="dark:bg-[#222226]">
+			<div class="flex h-screen">
+				@components.Sidebar()
+				<div class="border dark:border-gray-200/50 h-full"></div>
+				@components.Table()
+			</div>
+		</body>
+	</html>
+}
