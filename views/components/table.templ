@@ -1,11 +1,5 @@
 package components
 
 templ Table() {
-	<div class="flex flex-col flex-1 min-h-screen">
-		<div class="sticky top-0 left-0 right-0 flex justify-center items-center w-full">
-			<button id="structure-btn" class="p-2 text-white rounded-md hover:bg-gray-100/10">Structure</button>
-			<button id="data-btn" class="m-1 p-2 text-white rounded-md hover:bg-gray-100/10">Data</button>
-		</div>
-		<div class="p-2 m-2 mt-16" id="table"></div>
-	</div>
+	<div class="p-2 m-2 mt-16 overflow-auto w-auto h-auto" id="table"></div>
 }

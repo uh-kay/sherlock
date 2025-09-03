@@ -4,10 +4,10 @@ const sidebarElement = document.getElementById("sidebar");
 const tableElement = document.getElementById("table");
 const structureButton = document.getElementById("structure-btn");
 const dataButton = document.getElementById("data-btn");
+const toolbarElement = document.getElementById("toolbar");
 
-let currentTable = null; // Track the currently selected table
+let currentTable = null;
 
-// Load table list
 DatabaseService.ListTable().then((result) => {
   sidebarElement.innerHTML = result
     .map(
@@ -17,28 +17,23 @@ DatabaseService.ListTable().then((result) => {
     .join("");
 });
 
-// Handle sidebar table selection
-sidebarElement.addEventListener("click", (e) => {
+sidebarElement?.addEventListener("click", (e) => {
   if (e.target.tagName === "BUTTON") {
     const tablename = e.target.dataset.table;
     currentTable = tablename;
 
-    // Highlight selected table
     sidebarElement
       .querySelectorAll("button")
       .forEach((btn) => btn.classList.remove("text-blue-500"));
     e.target.classList.add("text-blue-500");
 
-    // Default to showing data when a table is selected
-    showTableData(tablename);
+    onTableSwitch(tablename);
   }
 });
 
-// Handle Structure button click
 structureButton?.addEventListener("click", () => {
   if (currentTable) {
-    dataButton.classList.remove("bg-gray-100/25");
-    structureButton.classList.add("bg-gray-100/25");
+    setActiveButton(structureButton);
     showTableStructure(currentTable);
   } else {
     tableElement.innerHTML =
@@ -46,17 +41,28 @@ structureButton?.addEventListener("click", () => {
   }
 });
 
-// Handle Data button click
 dataButton?.addEventListener("click", () => {
   if (currentTable) {
-    dataButton.classList.add("bg-gray-100/25");
-    structureButton.classList.remove("bg-gray-100/25");
+    setActiveButton(dataButton);
     showTableData(currentTable);
   } else {
     tableElement.innerHTML =
       '<p class="text-gray-600">Please select a table first</p>';
   }
 });
+
+function setActiveButton(activeBtn) {
+  [structureButton, dataButton].forEach((btn) => {
+    btn?.classList.remove("bg-gray-100/25");
+  });
+  activeBtn?.classList.add("bg-gray-100/25");
+}
+
+function onTableSwitch(newTable) {
+  currentTable = newTable;
+  setActiveButton(dataButton);
+  showTableData(newTable);
+}
 
 function showTableData(tablename) {
   DatabaseService.ListData(tablename)
@@ -106,28 +112,59 @@ function createStructureHTML(structure) {
     return '<p class="text-gray-600">No structure information available</p>';
   }
 
-  let html = '<table class="w-full border-collapse border border-gray-300">';
-  html += "<thead><tr>";
-  html +=
-    '<th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">column_name</th>';
-  html +=
-    '<th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">data_type</th>';
-  html +=
-    '<th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">nullable</th>';
-  html +=
-    '<th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">default</th>';
-  html += "</tr></thead>";
-  html += "<tbody>";
+  let html = `<table class="w-full border-collapse border border-gray-300">
+    <thead><tr>
+    <th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">column_name</th>
+    <th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">data_type</th>
+    <th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">nullable</th>
+    <th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">default</th>
+    </tr></thead>
+    <tbody>`;
 
   structure.forEach((column) => {
-    html += '<tr class="hover:bg-gray-50 dark:hover:bg-gray-50/25">';
-    html += `<td class="p-2 border border-gray-200 dark:text-gray-200">${column.column_name || ""}</td>`;
-    html += `<td class="p-2 border border-gray-200 dark:text-gray-200">${column.data_type || ""}</td>`;
-    html += `<td class="p-2 border border-gray-200 dark:text-gray-200">${column.nullable || ""}</td>`;
-    html += `<td class="p-2 border border-gray-200 dark:text-gray-200">${column.column_default || "NULL"}</td>`;
-    html += "</tr>";
+    html += `<tr class="hover:bg-gray-50 dark:hover:bg-gray-50/25">
+      <td class="p-2 border border-gray-200 dark:text-gray-200">${column.column_name || ""}</td>
+      <td class="p-2 border border-gray-200 dark:text-gray-200">${column.data_type || ""}</td>
+      <td class="p-2 border border-gray-200 dark:text-gray-200">${column.nullable || ""}</td>
+      <td class="p-2 border border-gray-200 dark:text-gray-200">${column.column_default || "NULL"}</td>
+      </tr>`;
   });
 
   html += "</tbody></table>";
   return html;
 }
+
+function setTableDimensions() {
+  const calculate = () => {
+    const sidebarWidth =
+      Math.max(sidebarElement.offsetWidth, sidebarElement.scrollWidth) + 1;
+    const toolbarHeight = toolbarElement.offsetHeight;
+
+    tableElement.style.maxWidth = `calc(100vw - ${sidebarWidth}px - 32px)`;
+    tableElement.style.maxHeight = `calc(100vh - ${toolbarHeight}px - 32px)`;
+  };
+
+  calculate();
+  setTimeout(calculate, 0);
+  setTimeout(calculate, 100);
+  setTimeout(calculate, 300);
+}
+
+function updateToolbarOffset() {
+  if (!sidebarElement || !toolbarElement) return;
+  const w = sidebarElement.offsetWidth || 0;
+  if (getComputedStyle(toolbarElement).position === "absolute") {
+    toolbarElement.style.width = `calc(100vw - ${w}px)`;
+  }
+}
+
+window.addEventListener("load", () =>
+  requestAnimationFrame(updateToolbarOffset),
+);
+window.addEventListener("resize", updateToolbarOffset);
+
+document.addEventListener("DOMContentLoaded", setTableDimensions);
+window.addEventListener("load", () =>
+  requestAnimationFrame(setTableDimensions),
+);
+window.addEventListener("resize", setTableDimensions);

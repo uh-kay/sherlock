@@ -5,11 +5,17 @@ import "sqlexplorer/views/components"
 templ Index() {
 	<html lang="en">
 		@components.Header()
-		<body class="dark:bg-[#222226]">
+		<body class="dark:bg-[#222226] overflow-hidden">
 			<div class="flex h-screen">
-				@components.Sidebar()
-				<div class="border dark:border-gray-200/50 h-full"></div>
-				@components.Table()
+				<div class="h-screen">
+					@components.Sidebar()
+				</div>
+				// Vertical divider
+				<div class="border-r dark:border-gray-200/50 h-screen"></div>
+				<div class="flex flex-col flex-1 min-h-screen">
+					@components.Toolbar()
+					@components.Table()
+				</div>
 			</div>
 		</body>
 	</html>
