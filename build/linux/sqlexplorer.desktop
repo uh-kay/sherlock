@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=sqlexplorer
+Exec=sqlexplorer
+Icon=sqlexplorer
+Categories=Development;
+Terminal=false
+Keywords=wails
+Version=1.0
+StartupNotify=false

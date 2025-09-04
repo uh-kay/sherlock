@@ -1,20 +1,29 @@
+import { Window } from "@wailsio/runtime";
 import { DatabaseService } from "./bindings/sqlexplorer/cmd/app";
+import "@wailsio/runtime";
 
 const sidebarElement = document.getElementById("sidebar");
 const tableElement = document.getElementById("table");
 const structureButton = document.getElementById("structure-btn");
 const dataButton = document.getElementById("data-btn");
 const toolbarElement = document.getElementById("toolbar");
+const windowControlElement = document.getElementById("window-control");
+const closeButton = document.getElementById("close-btn");
+const hideButton = document.getElementById("hide-btn");
+const maximizeButton = document.getElementById("maximize-btn");
+const minimizeButton = document.getElementById("minimize-btn");
 
 let currentTable = null;
 
 DatabaseService.ListTable().then((result) => {
-  sidebarElement.innerHTML = result
-    .map(
-      (item) =>
-        `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
-    )
-    .join("");
+  sidebarElement.innerHTML =
+    `<p class="text-xl font-semibold mb-2">Tables</p>` +
+    result
+      .map(
+        (item) =>
+          `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
+      )
+      .join("");
 });
 
 sidebarElement?.addEventListener("click", (e) => {
@@ -152,10 +161,12 @@ function setTableDimensions() {
 
 function updateToolbarOffset() {
   if (!sidebarElement || !toolbarElement) return;
-  const w = sidebarElement.offsetWidth || 0;
+  const sidebarWidth = sidebarElement.offsetWidth || 0;
+  const windowControlWidth = windowControlElement.offsetWidth;
   if (getComputedStyle(toolbarElement).position === "absolute") {
-    toolbarElement.style.width = `calc(100vw - ${w}px)`;
+    toolbarElement.style.width = `calc(100vw - ${sidebarWidth + windowControlWidth}px)`;
   }
+  toolbarElement.classList.remove("absolute");
 }
 
 window.addEventListener("load", () =>
@@ -168,3 +179,23 @@ window.addEventListener("load", () =>
   requestAnimationFrame(setTableDimensions),
 );
 window.addEventListener("resize", setTableDimensions);
+
+closeButton.addEventListener("click", () => {
+  Window.Close();
+});
+
+hideButton.addEventListener("click", () => {
+  Window.Minimise();
+});
+
+maximizeButton.addEventListener("click", () => {
+  Window.ToggleMaximise();
+  maximizeButton.classList.toggle("hidden");
+  minimizeButton.classList.toggle("hidden");
+});
+
+minimizeButton.addEventListener("click", () => {
+  Window.ToggleMaximise();
+  maximizeButton.classList.toggle("hidden");
+  minimizeButton.classList.toggle("hidden");
+});

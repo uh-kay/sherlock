@@ -11,7 +11,10 @@ templ Index() {
 					@components.Sidebar()
 				</div>
 				<div class="flex flex-col flex-1 min-h-screen">
-					@components.Toolbar()
+					<div class="flex items-center" style="--wails-draggable:drag">
+						@components.Toolbar()
+						@components.WindowControl()
+					</div>
 					@components.Table()
 				</div>
 			</div>

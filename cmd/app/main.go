@@ -3,16 +3,12 @@ package main
 import (
 	"context"
 	_ "embed"
-	"io/fs"
 	"log"
-	"net/http"
 	"os"
 	"sqlexplorer/frontend"
 	"sqlexplorer/internal/db"
 	"sqlexplorer/views"
-	"strings"
 
-	"github.com/gin-gonic/gin"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -35,16 +31,16 @@ func main() {
 		log.Fatal(err)
 	}
 
-	ginEngine := gin.New()
-	ginEngine.Use(gin.Recovery())
+	// ginEngine := gin.New()
+	// ginEngine.Use(gin.Recovery())
 
 	assets := frontend.Assets
 
-	distFS, err := fs.Sub(assets, "dist")
-	if err != nil {
-		log.Fatal(err)
-	}
-	ginEngine.StaticFS("/", http.FS(distFS))
+	// distFS, err := fs.Sub(assets, "dist")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// ginEngine.StaticFS("/", http.FS(distFS))
 
 	app := application.New(application.Options{
 		Name:        "sqlexplorer",
@@ -53,8 +49,7 @@ func main() {
 			application.NewService(&DatabaseService{db: db}),
 		},
 		Assets: application.AssetOptions{
-			Handler:    ginEngine,
-			Middleware: GinMiddleware(ginEngine),
+			Handler: application.AssetFileServerFS(assets),
 		},
 		Mac: application.MacOptions{
 			ApplicationShouldTerminateAfterLastWindowClosed: true,
@@ -70,6 +65,8 @@ func main() {
 		},
 		BackgroundColour: application.NewRGB(27, 38, 54),
 		URL:              "/",
+		Frameless:        true,
+		DisableResize:    false,
 	})
 
 	err = app.Run()
@@ -78,15 +75,15 @@ func main() {
 	}
 }
 
-func GinMiddleware(ginEngine *gin.Engine) application.Middleware {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if strings.HasPrefix(r.URL.Path, "/wails") {
-				next.ServeHTTP(w, r)
-				return
-			}
+// func GinMiddleware(ginEngine *gin.Engine) application.Middleware {
+// 	return func(next http.Handler) http.Handler {
+// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// 			if strings.HasPrefix(r.URL.Path, "/wails") {
+// 				next.ServeHTTP(w, r)
+// 				return
+// 			}
 
-			ginEngine.ServeHTTP(w, r)
-		})
-	}
-}
+// 			ginEngine.ServeHTTP(w, r)
+// 		})
+// 	}
+// }
