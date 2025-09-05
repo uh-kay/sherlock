@@ -1,0 +1,22 @@
+<html lang="en"><head><script type="module" src="./main.js"></script><script src="https://cdn.tailwindcss.com"></script><title>Wails App</title><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head><body class="dark:bg-[#222226]"><div class="flex h-screen"><div class="h-full"><div id="sidebar" class="flex flex-col p-2 pt-4 text-xl items-start border-r dark:border-gray-200/50 dark:text-gray-200 h-full overflow-y-auto"></div></div><div class="flex flex-col flex-1 min-h-screen"><div class="flex items-center" style="--wails-draggable:drag"><div class="absolute flex justify-center items-center my-2" id="toolbar"><button id="structure-btn" class="p-2 py-1 text-white rounded-md hover:bg-gray-100/10">Structure</button> <button id="data-btn" class="ml-1 p-2 py-1 text-white rounded-md hover:bg-gray-100/10">Data</button></div><div class="flex items-center justify-end dark:text-white" id="window-control" style="--wails-draggable:drag"><button id="hide-btn" class="hover:bg-gray-100/25"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path></svg></button> <button id="maximize-btn" class="ml-1 hover:bg-gray-100/25"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg></button> <button id="minimize-btn" class="hidden ml-1 hover:bg-gray-100/25"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect></svg></button> <button id="close-btn" class="ml-1 mr-2 hover:bg-gray-100/25"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"></path><path d="m6 6 12 12"></path></svg></button></div></div><div class="p-2 m-2 mt-8 overflow-auto w-auto h-auto" id="table"></div></div></div></body><script>
+  		  window.onload = () => {
+          const tablesList = sessionStorage.getItem('tablesList');
+          if (tablesList) {
+            const result = JSON.parse(tablesList);
+            const sidebarElement = document.getElementById("sidebar");
+
+            if (sidebarElement) {
+              sidebarElement.innerHTML =
+                `<p class="text-xl font-semibold mb-2">Tables</p>` +
+                result
+                  .map(
+                    (item) =>
+                      `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
+                  )
+                  .join("");
+            }
+
+            sessionStorage.removeItem('tablesList');
+          }
+          }
+		</script></html>

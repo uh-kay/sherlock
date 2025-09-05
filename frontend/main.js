@@ -1,5 +1,5 @@
 import { Window } from "@wailsio/runtime";
-import { DatabaseService } from "./bindings/sqlexplorer/cmd/app";
+import { PostgresService } from "./bindings/sqlexplorer/cmd/app";
 import "@wailsio/runtime";
 
 const sidebarElement = document.getElementById("sidebar");
@@ -15,16 +15,32 @@ const minimizeButton = document.getElementById("minimize-btn");
 
 let currentTable = null;
 
-DatabaseService.ListTable().then((result) => {
-  sidebarElement.innerHTML =
-    `<p class="text-xl font-semibold mb-2">Tables</p>` +
-    result
-      .map(
-        (item) =>
-          `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
-      )
-      .join("");
-});
+window.Connect = async () => {
+  let host = document.getElementById("host").value;
+  let port = document.getElementById("port").value;
+  let user = document.getElementById("user").value;
+  let password = document.getElementById("password").value;
+  let database = document.getElementById("database").value;
+  let address = `postgres://${user}:${password}@${host}:${port}/${database}`;
+
+  await PostgresService.Connect(address);
+  const result = await PostgresService.ListTable();
+
+  sessionStorage.setItem("tablesList", JSON.stringify(result));
+
+  window.location.href = "/postgres";
+};
+
+// PostgresService.ListTable().then((result) => {
+//   sidebarElement.innerHTML =
+//     `<p class="text-xl font-semibold mb-2">Tables</p>` +
+//     result
+//       .map(
+//         (item) =>
+//           `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
+//       )
+//       .join("");
+// });
 
 sidebarElement?.addEventListener("click", (e) => {
   if (e.target.tagName === "BUTTON") {
@@ -74,7 +90,7 @@ function onTableSwitch(newTable) {
 }
 
 function showTableData(tablename) {
-  DatabaseService.ListData(tablename)
+  PostgresService.ListData(tablename)
     .then((data) => {
       tableElement.innerHTML = createTableHTML(data);
     })
@@ -84,7 +100,7 @@ function showTableData(tablename) {
 }
 
 function showTableStructure(tablename) {
-  DatabaseService.ListStructure(tablename)
+  PostgresService.ListStructure(tablename)
     .then((structure) => {
       tableElement.innerHTML = createStructureHTML(structure);
     })

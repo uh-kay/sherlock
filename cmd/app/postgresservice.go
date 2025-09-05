@@ -4,17 +4,29 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"sqlexplorer/internal/db"
 	"strings"
 	"time"
 
 	"github.com/jackc/pgx/v5"
 )
 
-type DatabaseService struct {
+type PostgresService struct {
 	db *pgx.Conn
 }
 
-func (d *DatabaseService) ListTable() []string {
+func (d *PostgresService) Connect(addr string) {
+	conn := db.New(addr)
+	d.db = conn
+}
+
+func (d *PostgresService) Close() {
+	if d.db != nil {
+		d.db.Close(context.Background())
+	}
+}
+
+func (d *PostgresService) ListTable() []string {
 	var tables []string
 	query := "SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema'"
 
@@ -37,7 +49,7 @@ func (d *DatabaseService) ListTable() []string {
 	return tables
 }
 
-func (d *DatabaseService) ListData(tablename string) []map[string]string {
+func (d *PostgresService) ListData(tablename string) []map[string]string {
 	var data []map[string]string
 
 	columnQuery := `
@@ -127,7 +139,7 @@ type Structure struct {
 	Default  sql.NullString
 }
 
-func (d *DatabaseService) ListStructure(tablename string) []map[string]string {
+func (d *PostgresService) ListStructure(tablename string) []map[string]string {
 	var data []map[string]string
 
 	query := `

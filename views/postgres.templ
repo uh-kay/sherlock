@@ -1,0 +1,45 @@
+package views
+
+import "sqlexplorer/views/components"
+
+templ Postgres() {
+	<html lang="en">
+		@components.Header()
+		<body class="dark:bg-[#222226]">
+			<div class="flex h-screen">
+				<div class="h-full">
+					@components.Sidebar()
+				</div>
+				<div class="flex flex-col flex-1 min-h-screen">
+					<div class="flex items-center" style="--wails-draggable:drag">
+						@components.Toolbar()
+						@components.WindowControl()
+					</div>
+					@components.Table()
+				</div>
+			</div>
+		</body>
+		<script>
+  		  window.onload = () => {
+          const tablesList = sessionStorage.getItem('tablesList');
+          if (tablesList) {
+            const result = JSON.parse(tablesList);
+            const sidebarElement = document.getElementById("sidebar");
+
+            if (sidebarElement) {
+              sidebarElement.innerHTML =
+                `<p class="text-xl font-semibold mb-2">Tables</p>` +
+                result
+                  .map(
+                    (item) =>
+                      `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
+                  )
+                  .join("");
+            }
+
+            sessionStorage.removeItem('tablesList');
+          }
+          }
+		</script>
+	</html>
+}

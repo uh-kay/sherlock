@@ -9,8 +9,8 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func New() *pgx.Conn {
-	conn, err := pgx.Connect(context.Background(), "postgres://root:password@localhost:5433/social?sslmode=disable")
+func New(addr string) *pgx.Conn {
+	conn, err := pgx.Connect(context.Background(), addr)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
 	}

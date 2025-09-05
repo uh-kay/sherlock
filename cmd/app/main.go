@@ -5,48 +5,35 @@ import (
 	_ "embed"
 	"log"
 	"os"
+	"path/filepath"
 	"sqlexplorer/frontend"
-	"sqlexplorer/internal/db"
 	"sqlexplorer/views"
 
+	"github.com/a-h/templ"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
 func main() {
-	db := db.New()
-	defer db.Close(context.Background())
+	// addr := "postgres://root:password@localhost:5433/social?sslmode=disable"
 
-	err := os.Chdir("./frontend")
-	if err != nil {
+	// db := db.New(addr)
+	// defer db.Close(context.Background())
+
+	if err := renderTempltoFile("index.html", views.Index()); err != nil {
 		log.Fatal(err)
 	}
 
-	f, err := os.Create("index.html")
-	if err != nil {
+	if err := renderTempltoFile("postgres.html", views.Postgres()); err != nil {
 		log.Fatal(err)
 	}
-
-	err = views.Index().Render(context.Background(), f)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// ginEngine := gin.New()
-	// ginEngine.Use(gin.Recovery())
 
 	assets := frontend.Assets
-
-	// distFS, err := fs.Sub(assets, "dist")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// ginEngine.StaticFS("/", http.FS(distFS))
 
 	app := application.New(application.Options{
 		Name:        "sqlexplorer",
 		Description: "Explore SQL databases",
 		Services: []application.Service{
-			application.NewService(&DatabaseService{db: db}),
+			application.NewService(&PostgresService{}),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -69,21 +56,19 @@ func main() {
 		DisableResize:    false,
 	})
 
-	err = app.Run()
+	err := app.Run()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-// func GinMiddleware(ginEngine *gin.Engine) application.Middleware {
-// 	return func(next http.Handler) http.Handler {
-// 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-// 			if strings.HasPrefix(r.URL.Path, "/wails") {
-// 				next.ServeHTTP(w, r)
-// 				return
-// 			}
+func renderTempltoFile(filename string, component templ.Component) error {
+	path := filepath.Join("./frontend", filename)
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
 
-// 			ginEngine.ServeHTTP(w, r)
-// 		})
-// 	}
-// }
+	return component.Render(context.Background(), f)
+}

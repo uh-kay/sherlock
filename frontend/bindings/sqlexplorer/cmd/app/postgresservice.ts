@@ -5,20 +5,28 @@
 // @ts-ignore: Unused imports
 import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Create } from "@wailsio/runtime";
 
+export function Close(): $CancellablePromise<void> {
+    return $Call.ByID(2851298498);
+}
+
+export function Connect(addr: string): $CancellablePromise<void> {
+    return $Call.ByID(292084820, addr);
+}
+
 export function ListData(tablename: string): $CancellablePromise<{ [_: string]: string }[]> {
-    return $Call.ByID(1448516340, tablename).then(($result: any) => {
+    return $Call.ByID(163768162, tablename).then(($result: any) => {
         return $$createType1($result);
     });
 }
 
 export function ListStructure(tablename: string): $CancellablePromise<{ [_: string]: string }[]> {
-    return $Call.ByID(1818912865, tablename).then(($result: any) => {
+    return $Call.ByID(1184160443, tablename).then(($result: any) => {
         return $$createType1($result);
     });
 }
 
 export function ListTable(): $CancellablePromise<string[]> {
-    return $Call.ByID(3296071872).then(($result: any) => {
+    return $Call.ByID(635023622).then(($result: any) => {
         return $$createType2($result);
     });
 }
