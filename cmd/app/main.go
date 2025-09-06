@@ -14,11 +14,6 @@ import (
 )
 
 func main() {
-	// addr := "postgres://root:password@localhost:5433/social?sslmode=disable"
-
-	// db := db.New(addr)
-	// defer db.Close(context.Background())
-
 	if err := renderTempltoFile("index.html", views.Index()); err != nil {
 		log.Fatal(err)
 	}

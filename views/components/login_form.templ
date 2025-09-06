@@ -21,9 +21,17 @@ templ LoginForm() {
 			<label class="block dark:text-white">Password</label>
 			<input class="bg-gray-100/25 dark:text-white block w-full px-2 py-1 rounded-lg" type="password" id="password"/>
 		</div>
-		<div class="mb-4 flex flex-col">
+		<div class="mb-4 flex flex-col" id="db-input-div">
 			<label class="block dark:text-white">Database</label>
 			<input class="bg-gray-100/25 dark:text-white block w-full px-2 py-1 rounded-lg" id="database"/>
+		</div>
+		// <label class="flex mb-4">
+		// 	<input type="checkbox" class="sr-only peer"/>
+		// 	<div class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-100/25 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-500 dark:peer-checked:bg-blue-500"></div>
+		// 	<span class="dark:text-white ml-2">SSL Mode</span>
+		// </label>
+		<div class="text-red-500 hidden mb-4" id="pg-connect-error">
+			Connection refused
 		</div>
 		<div class="flex justify-end">
 			<button onclick="Connect()" class="rounded-lg px-2 py-1 bg-blue-500 dark:text-white">Connect</button>

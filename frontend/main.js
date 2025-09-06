@@ -12,6 +12,8 @@ const closeButton = document.getElementById("close-btn");
 const hideButton = document.getElementById("hide-btn");
 const maximizeButton = document.getElementById("maximize-btn");
 const minimizeButton = document.getElementById("minimize-btn");
+const dbInputElement = document.getElementById("db-input-div");
+const pgConnectErrorElement = document.getElementById("pg-connect-error");
 
 let currentTable = null;
 
@@ -21,26 +23,19 @@ window.Connect = async () => {
   let user = document.getElementById("user").value;
   let password = document.getElementById("password").value;
   let database = document.getElementById("database").value;
-  let address = `postgres://${user}:${password}@${host}:${port}/${database}`;
+  let address = `postgres://${user}:${password}@${host}:${port}/${database}?sslmode=disable`;
 
-  await PostgresService.Connect(address);
-  const result = await PostgresService.ListTable();
-
-  sessionStorage.setItem("tablesList", JSON.stringify(result));
-
-  window.location.href = "/postgres";
+  try {
+    await PostgresService.Connect(address);
+    const result = await PostgresService.ListTable();
+    // TODO: store connection string instead of table list for performance?
+    sessionStorage.setItem("tablesList", JSON.stringify(result));
+    window.location.href = "/postgres";
+  } catch {
+    dbInputElement.classList.replace("mb-4", "mb-2");
+    pgConnectErrorElement.classList.toggle("hidden");
+  }
 };
-
-// PostgresService.ListTable().then((result) => {
-//   sidebarElement.innerHTML =
-//     `<p class="text-xl font-semibold mb-2">Tables</p>` +
-//     result
-//       .map(
-//         (item) =>
-//           `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
-//       )
-//       .join("");
-// });
 
 sidebarElement?.addEventListener("click", (e) => {
   if (e.target.tagName === "BUTTON") {

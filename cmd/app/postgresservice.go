@@ -15,9 +15,13 @@ type PostgresService struct {
 	db *pgx.Conn
 }
 
-func (d *PostgresService) Connect(addr string) {
-	conn := db.New(addr)
+func (d *PostgresService) Connect(addr string) error {
+	conn, err := db.New(addr)
+	if err != nil {
+		return err
+	}
 	d.db = conn
+	return nil
 }
 
 func (d *PostgresService) Close() {
