@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sqlexplorer/internal/db"
+	"sqlexplorer/db"
 	"strings"
 	"time"
 
@@ -53,7 +53,7 @@ func (d *PostgresService) ListTable() []string {
 	return tables
 }
 
-func (d *PostgresService) ListData(tablename string) []map[string]string {
+func (d *PostgresService) ListData(tablename string, offset int) []map[string]string {
 	var data []map[string]string
 
 	columnQuery := `
@@ -85,9 +85,9 @@ func (d *PostgresService) ListData(tablename string) []map[string]string {
 		selectParts = append(selectParts, colName+"::text")
 	}
 
-	query := fmt.Sprintf("SELECT %s FROM %s LIMIT $1", strings.Join(selectParts, ", "), tablename)
+	query := fmt.Sprintf("SELECT %s FROM %s LIMIT 50 OFFSET $1", strings.Join(selectParts, ", "), tablename)
 
-	rows, err := d.db.Query(context.Background(), query, 50)
+	rows, err := d.db.Query(context.Background(), query, offset)
 	if err != nil {
 		fmt.Printf("Error querying table: %v\n", err)
 		return nil

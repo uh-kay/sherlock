@@ -14,6 +14,7 @@ const maximizeButton = document.getElementById("maximize-btn");
 const minimizeButton = document.getElementById("minimize-btn");
 const dbInputElement = document.getElementById("db-input-div");
 const pgConnectErrorElement = document.getElementById("pg-connect-error");
+const pageControlElement = document.getElementById("page-control");
 
 let currentTable = null;
 
@@ -23,7 +24,8 @@ window.Connect = async () => {
   let user = document.getElementById("user").value;
   let password = document.getElementById("password").value;
   let database = document.getElementById("database").value;
-  let address = `postgres://${user}:${password}@${host}:${port}/${database}?sslmode=disable`;
+  // let address = `postgres://${user}:${password}@${host}:${port}/${database}?sslmode=disable`;
+  let address = `postgres://root:password@localhost:5433/social?sslmode=disable`;
 
   try {
     await PostgresService.Connect(address);
@@ -84,8 +86,10 @@ function onTableSwitch(newTable) {
   showTableData(newTable);
 }
 
+let offset = 0;
+
 function showTableData(tablename) {
-  PostgresService.ListData(tablename)
+  PostgresService.ListData(tablename, offset)
     .then((data) => {
       tableElement.innerHTML = createTableHTML(data);
     })
@@ -93,6 +97,28 @@ function showTableData(tablename) {
       tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
     });
 }
+
+window.showNextPage = () => {
+  offset += 50;
+  PostgresService.ListData(currentTable, offset)
+    .then((data) => {
+      tableElement.innerHTML = createTableHTML(data);
+    })
+    .catch((error) => {
+      tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
+    });
+};
+
+window.showPreviousPage = () => {
+  offset -= 50;
+  PostgresService.ListData(currentTable, offset)
+    .then((data) => {
+      tableElement.innerHTML = createTableHTML(data);
+    })
+    .catch((error) => {
+      tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
+    });
+};
 
 function showTableStructure(tablename) {
   PostgresService.ListStructure(tablename)
@@ -159,15 +185,20 @@ function setTableDimensions() {
     const sidebarWidth =
       Math.max(sidebarElement.offsetWidth, sidebarElement.scrollWidth) + 1;
     const toolbarHeight = toolbarElement.offsetHeight;
+    const pageControlHeight = pageControlElement.offsetHeight;
 
     tableElement.style.maxWidth = `calc(100vw - ${sidebarWidth}px - 32px)`;
-    tableElement.style.maxHeight = `calc(100vh - ${toolbarHeight}px - 32px)`;
+    tableElement.style.maxHeight = `calc(100vh - ${toolbarHeight + pageControlHeight}px)`;
   };
 
   calculate();
-  setTimeout(calculate, 0);
-  setTimeout(calculate, 100);
-  setTimeout(calculate, 300);
+  const resizeObserver = new ResizeObserver(() => {
+    calculate();
+  });
+
+  resizeObserver.observe(pageControlElement);
+  resizeObserver.observe(sidebarElement);
+  resizeObserver.observe(toolbarElement);
 }
 
 function updateToolbarOffset() {
