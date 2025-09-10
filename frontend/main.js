@@ -20,6 +20,8 @@ let currentTable = null;
 let offset = 0;
 let rowCount = 0;
 let pageCount = 0;
+let columnName = null;
+let direction = null;
 
 window.Connect = async () => {
   let host = document.getElementById("host").value;
@@ -56,6 +58,34 @@ sidebarElement?.addEventListener("click", (e) => {
   }
 });
 
+tableElement?.addEventListener("click", (e) => {
+  const th = e.target.closest("th[data-column-name]");
+  if (th && th.dataset.columnName) {
+    const clickedColumn = th.dataset.columnName;
+
+    tableElement.querySelectorAll("th").forEach((th) => {
+      if (th.dataset.columnName) {
+        const flexDiv = th.querySelector("div.flex");
+        if (flexDiv) {
+          flexDiv.innerHTML = th.dataset.columnName;
+        }
+      }
+    });
+
+    if (columnName === clickedColumn) {
+      direction = direction === "ASC" ? "DESC" : "ASC";
+    } else {
+      columnName = clickedColumn;
+      direction = "ASC";
+    }
+
+    offset = 0;
+    pageCount = 1;
+
+    showTableData(currentTable, columnName, direction, offset);
+  }
+});
+
 structureButton?.addEventListener("click", () => {
   setActiveButton(structureButton);
   showTableStructure(currentTable);
@@ -75,18 +105,39 @@ function setActiveButton(activeBtn) {
 
 function onTableSwitch(newTable) {
   currentTable = newTable;
+  columnName = null;
+  direction = null;
   offset = 0;
   pageCount = 1;
   setActiveButton(dataButton);
-  showTableData(newTable, offset);
+  showTableData(newTable, columnName, direction, offset);
   showRowCount(newTable);
 }
 
-function showTableData(tablename, offset) {
-  PostgresService.ListData(tablename, offset)
+function showTableData(
+  tablename,
+  sortColumn = null,
+  direction = null,
+  offset = 0,
+) {
+  PostgresService.ListData(tablename, sortColumn, direction, offset)
     .then((data) => {
       tableElement.innerHTML = createTableHTML(data);
       updatePaginationElements(data);
+      if (sortColumn) {
+        const activeHeader = document.querySelector(
+          `th[data-column-name="${sortColumn}"]`,
+        );
+        if (activeHeader) {
+          const chevronDown = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><path d="m6 9 6 6 6-6"/></svg>`;
+          const chevronUp = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="ml-2"><path d="m18 15-6-6-6 6"/></svg>`;
+          const arrow = direction === "ASC" ? chevronUp : chevronDown;
+          const flexDiv = activeHeader.querySelector("div.flex");
+          if (flexDiv) {
+            flexDiv.innerHTML = `${sortColumn} ${arrow}`;
+          }
+        }
+      }
     })
     .catch((error) => {
       tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
@@ -147,7 +198,7 @@ function createTableHTML(data) {
   let html = '<table class="w-full border-collapse border border-gray-300">';
   html += "<thead><tr>";
   headers.forEach((header) => {
-    html += `<th class="p-3 text-left border border-gray-300 font-medium dark:text-gray-200">${header}</th>`;
+    html += `<th data-column-name="${header}" class="p-3 text-left border border-gray-300 font-medium dark:text-gray-200"><div class="flex items-center">${header}</div></th>`;
   });
   html += "</tr></thead>";
   html += "<tbody>";

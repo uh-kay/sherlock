@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"slices"
 	"strings"
 	"time"
 
@@ -53,14 +54,13 @@ func (d *PostgresService) ListTable() []string {
 	return tables
 }
 
-func (d *PostgresService) ListData(tablename string, offset int) []map[string]string {
+func (d *PostgresService) ListData(tablename, columnName, direction string, offset int) []map[string]string {
 	var data []map[string]string
 
 	columnQuery := `
         SELECT column_name, data_type, udt_name
         FROM information_schema.columns
-        WHERE table_name = $1
-        ORDER BY ordinal_position`
+        WHERE table_name = $1`
 
 	columnRows, err := d.db.Query(context.Background(), columnQuery, tablename)
 	if err != nil {
@@ -81,13 +81,37 @@ func (d *PostgresService) ListData(tablename string, offset int) []map[string]st
 
 		columns = append(columns, colName)
 
-		// cast to text to avoid type error
-		selectParts = append(selectParts, colName+"::text")
+		numericTypes := []string{
+			"integer", "bigint", "smallint", "decimal", "numeric",
+			"real", "double precision", "serial", "bigserial",
+		}
+
+		// cast to text except numeric types to avoid type error
+		if slices.Contains(numericTypes, dataType) {
+			selectParts = append(selectParts, colName)
+		} else {
+			selectParts = append(selectParts, colName+"::text")
+		}
 	}
 
-	query := fmt.Sprintf("SELECT %s FROM %s LIMIT 50 OFFSET $1", strings.Join(selectParts, ", "), tablename)
+	var query string
+	if direction != "" {
+		query = fmt.Sprintf("SELECT %s FROM %s ORDER BY %s %s LIMIT 50 OFFSET %d",
+			strings.Join(selectParts, ", "),
+			tablename,
+			columnName,
+			direction,
+			offset,
+		)
+	} else {
+		query = fmt.Sprintf("SELECT %s FROM %s LIMIT 50 OFFSET %d",
+			strings.Join(selectParts, ", "),
+			tablename,
+			offset,
+		)
+	}
 
-	rows, err := d.db.Query(context.Background(), query, offset)
+	rows, err := d.db.Query(context.Background(), query)
 	if err != nil {
 		fmt.Printf("Error querying table: %v\n", err)
 		return nil
