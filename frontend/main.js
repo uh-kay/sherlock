@@ -1,5 +1,5 @@
 import { Window } from "@wailsio/runtime";
-import { PostgresService } from "./bindings/sqlexplorer/cmd/app";
+import { PostgresService } from "./bindings/github.com/uh-kay/sherlock/cmd/app";
 import "@wailsio/runtime";
 
 const sidebarElement = document.getElementById("sidebar");
@@ -17,6 +17,9 @@ const pgConnectErrorElement = document.getElementById("pg-connect-error");
 const pageControlElement = document.getElementById("page-control");
 
 let currentTable = null;
+let offset = 0;
+let rowCount = 0;
+let pageCount = 0;
 
 window.Connect = async () => {
   let host = document.getElementById("host").value;
@@ -54,23 +57,13 @@ sidebarElement?.addEventListener("click", (e) => {
 });
 
 structureButton?.addEventListener("click", () => {
-  if (currentTable) {
-    setActiveButton(structureButton);
-    showTableStructure(currentTable);
-  } else {
-    tableElement.innerHTML =
-      '<p class="text-gray-600">Please select a table first</p>';
-  }
+  setActiveButton(structureButton);
+  showTableStructure(currentTable);
 });
 
 dataButton?.addEventListener("click", () => {
-  if (currentTable) {
-    setActiveButton(dataButton);
-    showTableData(currentTable);
-  } else {
-    tableElement.innerHTML =
-      '<p class="text-gray-600">Please select a table first</p>';
-  }
+  setActiveButton(dataButton);
+  showTableData(currentTable);
 });
 
 function setActiveButton(activeBtn) {
@@ -82,16 +75,18 @@ function setActiveButton(activeBtn) {
 
 function onTableSwitch(newTable) {
   currentTable = newTable;
+  offset = 0;
+  pageCount = 1;
   setActiveButton(dataButton);
-  showTableData(newTable);
+  showTableData(newTable, offset);
+  showRowCount(newTable);
 }
 
-let offset = 0;
-
-function showTableData(tablename) {
+function showTableData(tablename, offset) {
   PostgresService.ListData(tablename, offset)
     .then((data) => {
       tableElement.innerHTML = createTableHTML(data);
+      updatePaginationElements(data);
     })
     .catch((error) => {
       tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
@@ -100,25 +95,39 @@ function showTableData(tablename) {
 
 window.showNextPage = () => {
   offset += 50;
-  PostgresService.ListData(currentTable, offset)
-    .then((data) => {
-      tableElement.innerHTML = createTableHTML(data);
-    })
-    .catch((error) => {
-      tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
-    });
+  pageCount += 1;
+  showTableData(currentTable, offset);
 };
 
 window.showPreviousPage = () => {
-  offset -= 50;
-  PostgresService.ListData(currentTable, offset)
-    .then((data) => {
-      tableElement.innerHTML = createTableHTML(data);
-    })
-    .catch((error) => {
-      tableElement.innerHTML = `<p class="text-red-600">Error loading data: ${error.message}</p>`;
-    });
+  offset = Math.max(0, offset - 50);
+  pageCount = Math.max(1, pageCount - 1);
+  showTableData(currentTable, offset);
 };
+
+function updatePaginationElements(data = null) {
+  const previousButton = document.getElementById("previous-button");
+  const nextButton = document.getElementById("next-button");
+  const pageCountElement = document.getElementById("page-count");
+  const rowCountElement = document.getElementById("row-count");
+
+  previousButton.disabled = offset === 0;
+  nextButton.disabled = offset + 50 >= rowCount;
+  if (data.length) {
+    pageCountElement.innerHTML = `Page ${pageCount} of ${Math.ceil(rowCount / 50)}`;
+    rowCountElement.innerHTML = `(${offset + 1} - ${data.length + offset} of ${rowCount} rows)`;
+  } else {
+    pageCountElement.innerHTML = "";
+    rowCountElement.innerHTML = `0 row`;
+  }
+}
+
+function showRowCount(tablename) {
+  PostgresService.ListCount(tablename).then((data) => {
+    rowCount = data;
+    updatePaginationElements();
+  });
+}
 
 function showTableStructure(tablename) {
   PostgresService.ListStructure(tablename)
@@ -132,7 +141,7 @@ function showTableStructure(tablename) {
 
 function createTableHTML(data) {
   if (!data || data.length === 0) {
-    return '<p class="text-gray-600">No data available</p>';
+    return '<p class="text-gray-600 dark:text-gray-300">No data available</p>';
   }
   const headers = Object.keys(data[0]);
   let html = '<table class="w-full border-collapse border border-gray-300">';
@@ -223,6 +232,7 @@ window.addEventListener("load", () =>
 window.addEventListener("resize", setTableDimensions);
 
 closeButton.addEventListener("click", () => {
+  PostgresService.Close();
   Window.Close();
 });
 

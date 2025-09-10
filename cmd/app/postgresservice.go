@@ -4,15 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"sqlexplorer/db"
 	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/uh-kay/sherlock/db"
 )
 
 type PostgresService struct {
-	db *pgx.Conn
+	db *pgxpool.Pool
 }
 
 func (d *PostgresService) Connect(addr string) error {
@@ -26,7 +26,7 @@ func (d *PostgresService) Connect(addr string) error {
 
 func (d *PostgresService) Close() {
 	if d.db != nil {
-		d.db.Close(context.Background())
+		d.db.Close()
 	}
 }
 
@@ -144,7 +144,7 @@ type Structure struct {
 }
 
 func (d *PostgresService) ListStructure(tablename string) []map[string]string {
-	var data []map[string]string
+	var structure []map[string]string
 
 	query := `
 	SELECT column_name, data_type, is_nullable, column_default
@@ -154,7 +154,7 @@ func (d *PostgresService) ListStructure(tablename string) []map[string]string {
 	rows, err := d.db.Query(context.Background(), query, tablename)
 	if err != nil {
 		fmt.Println(err)
-		return data
+		return structure
 	}
 	defer rows.Close()
 
@@ -180,8 +180,19 @@ func (d *PostgresService) ListStructure(tablename string) []map[string]string {
 		} else {
 			row["column_default"] = ""
 		}
-		data = append(data, row)
+		structure = append(structure, row)
 	}
 
-	return data
+	return structure
+}
+
+func (d *PostgresService) ListCount(tablename string) int64 {
+	var count int64
+	query := fmt.Sprintf("SELECT COUNT(*) FROM %s", tablename)
+
+	err := d.db.QueryRow(context.Background(), query).Scan(&count)
+	if err != nil {
+		return 0
+	}
+	return count
 }

@@ -1,12 +1,14 @@
 package views
 
-import "sqlexplorer/views/components"
+import "github.com/uh-kay/sherlock/views/components"
 
 templ Index() {
 	<html lang="en">
 		@components.Header()
 		<body class="dark:bg-[#222226]">
-			@components.WindowControl()
+			<div class="mt-1">
+				@components.WindowControl()
+			</div>
 			<div class="flex justify-center">
 				@components.LoginForm()
 			</div>

@@ -1,6 +1,9 @@
 package components
 
 templ Table() {
-	<div class="p-2 m-2 mt-8 flex-1 overflow-auto w-auto h-auto" id="table"></div>
-	@PageControl()
+	<div class="p-2 mx-2 mb-2 mt-6 flex-1 overflow-auto w-auto h-auto" id="table"></div>
+	<div class="flex items-center">
+		@PageControl()
+		@StatusBar()
+	</div>
 }

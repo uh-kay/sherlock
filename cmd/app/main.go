@@ -6,10 +6,10 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"sqlexplorer/frontend"
-	"sqlexplorer/views"
 
 	"github.com/a-h/templ"
+	"github.com/uh-kay/sherlock/frontend"
+	"github.com/uh-kay/sherlock/views"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 

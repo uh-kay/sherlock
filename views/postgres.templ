@@ -1,6 +1,6 @@
 package views
 
-import "sqlexplorer/views/components"
+import "github.com/uh-kay/sherlock/views/components"
 
 templ Postgres() {
 	<html lang="en">
@@ -11,7 +11,7 @@ templ Postgres() {
 					@components.Sidebar()
 				</div>
 				<div class="flex flex-col flex-1 min-h-screen">
-					<div class="flex items-center" style="--wails-draggable:drag">
+					<div class="mt-1 flex" style="--wails-draggable:drag">
 						@components.Toolbar()
 						@components.WindowControl()
 					</div>
@@ -21,23 +21,24 @@ templ Postgres() {
 		</body>
 		<script>
   		  window.onload = () => {
-          const tablesList = sessionStorage.getItem('tablesList');
-          if (tablesList) {
-            const result = JSON.parse(tablesList);
-            const sidebarElement = document.getElementById("sidebar");
+            const tablesList = sessionStorage.getItem('tablesList');
+            if (tablesList) {
+              const result = JSON.parse(tablesList);
+              const sidebarElement = document.getElementById("sidebar");
 
-            if (sidebarElement) {
-              sidebarElement.innerHTML =
-                `<p class="text-xl font-semibold mb-2">Tables</p>` +
-                result
-                  .map(
-                    (item) =>
-                      `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
-                  )
-                  .join("");
+              if (sidebarElement) {
+                sidebarElement.innerHTML =
+                  `<p class="text-xl font-semibold mb-2">Tables</p>` +
+                  result
+                    .map(
+                      (item) =>
+                        `<button data-table="${item}" class="hover:text-blue-500">${item}</button>`,
+                    )
+                    .join("");
+              }
+              sidebarElement.children[1].click();
+              sessionStorage.removeItem('tablesList');
             }
-            sessionStorage.removeItem('tablesList');
-          }
           }
 		</script>
 	</html>

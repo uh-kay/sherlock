@@ -13,6 +13,10 @@ export function Connect(addr: string): $CancellablePromise<void> {
     return $Call.ByID(292084820, addr);
 }
 
+export function ListCount(tablename: string): $CancellablePromise<number> {
+    return $Call.ByID(204524089, tablename);
+}
+
 export function ListData(tablename: string, offset: number): $CancellablePromise<{ [_: string]: string }[]> {
     return $Call.ByID(163768162, tablename, offset).then(($result: any) => {
         return $$createType1($result);

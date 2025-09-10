@@ -23,7 +23,6 @@ dev_mode:
       - .git
       - node_modules
       - frontend
-      - views
       - bin
     file:
       - .DS_Store
@@ -31,6 +30,7 @@ dev_mode:
       - .gitkeep
     watched_extension:
       - "*.go"
+      - "*.templ"
     git_ignore: true
   executes:
     - cmd: wails3 task common:install:frontend:deps

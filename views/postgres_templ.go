@@ -8,7 +8,7 @@ package views
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "sqlexplorer/views/components"
+import "github.com/uh-kay/sherlock/views/components"
 
 func Postgres() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -47,7 +47,7 @@ func Postgres() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex flex-col flex-1 min-h-screen\"><div class=\"flex items-center\" style=\"--wails-draggable:drag\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "</div><div class=\"flex flex-col flex-1 min-h-screen\"><div class=\"mt-1 flex\" style=\"--wails-draggable:drag\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -67,7 +67,7 @@ func Postgres() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></body><script>\n  \t\t  window.onload = () => {\n          const tablesList = sessionStorage.getItem('tablesList');\n          if (tablesList) {\n            const result = JSON.parse(tablesList);\n            const sidebarElement = document.getElementById(\"sidebar\");\n\n            if (sidebarElement) {\n              sidebarElement.innerHTML =\n                `<p class=\"text-xl font-semibold mb-2\">Tables</p>` +\n                result\n                  .map(\n                    (item) =>\n                      `<button data-table=\"${item}\" class=\"hover:text-blue-500\">${item}</button>`,\n                  )\n                  .join(\"\");\n            }\n            sessionStorage.removeItem('tablesList');\n          }\n          }\n\t\t</script></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "</div></div></body><script>\n  \t\t  window.onload = () => {\n            const tablesList = sessionStorage.getItem('tablesList');\n            if (tablesList) {\n              const result = JSON.parse(tablesList);\n              const sidebarElement = document.getElementById(\"sidebar\");\n\n              if (sidebarElement) {\n                sidebarElement.innerHTML =\n                  `<p class=\"text-xl font-semibold mb-2\">Tables</p>` +\n                  result\n                    .map(\n                      (item) =>\n                        `<button data-table=\"${item}\" class=\"hover:text-blue-500\">${item}</button>`,\n                    )\n                    .join(\"\");\n              }\n              sidebarElement.children[1].click();\n              sessionStorage.removeItem('tablesList');\n            }\n          }\n\t\t</script></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
