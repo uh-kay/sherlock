@@ -144,16 +144,17 @@ function showTableData(
     });
 }
 
+// TODO: Should page control persist sort between pages?
 window.showNextPage = () => {
   offset += 50;
   pageCount += 1;
-  showTableData(currentTable, offset);
+  showTableData(currentTable, null, null, offset);
 };
 
 window.showPreviousPage = () => {
   offset = Math.max(0, offset - 50);
   pageCount = Math.max(1, pageCount - 1);
-  showTableData(currentTable, offset);
+  showTableData(currentTable, null, null, offset);
 };
 
 function updatePaginationElements(data = null) {
