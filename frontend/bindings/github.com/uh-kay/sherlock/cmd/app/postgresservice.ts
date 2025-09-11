@@ -23,6 +23,12 @@ export function ListData(tablename: string, columnName: string, direction: strin
     });
 }
 
+export function ListIndex(tablename: string): $CancellablePromise<{ [_: string]: string }[]> {
+    return $Call.ByID(565007302, tablename).then(($result: any) => {
+        return $$createType1($result);
+    });
+}
+
 export function ListStructure(tablename: string): $CancellablePromise<{ [_: string]: string }[]> {
     return $Call.ByID(1184160443, tablename).then(($result: any) => {
         return $$createType1($result);

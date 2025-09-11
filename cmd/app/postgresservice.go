@@ -182,25 +182,25 @@ func (d *PostgresService) ListStructure(tablename string) []map[string]string {
 	}
 	defer rows.Close()
 
-	var dbStructure Structure
+	var tableStructure Structure
 
 	for rows.Next() {
 		if err := rows.Scan(
-			&dbStructure.Name,
-			&dbStructure.Type,
-			&dbStructure.Nullable,
-			&dbStructure.Default,
+			&tableStructure.Name,
+			&tableStructure.Type,
+			&tableStructure.Nullable,
+			&tableStructure.Default,
 		); err != nil {
 			fmt.Println(err)
 			continue
 		}
 
 		row := make(map[string]string)
-		row["column_name"] = dbStructure.Name
-		row["data_type"] = dbStructure.Type
-		row["nullable"] = dbStructure.Nullable
-		if dbStructure.Default.Valid {
-			row["column_default"] = dbStructure.Default.String
+		row["column_name"] = tableStructure.Name
+		row["data_type"] = tableStructure.Type
+		row["nullable"] = tableStructure.Nullable
+		if tableStructure.Default.Valid {
+			row["column_default"] = tableStructure.Default.String
 		} else {
 			row["column_default"] = ""
 		}
@@ -219,4 +219,34 @@ func (d *PostgresService) ListCount(tablename string) int64 {
 		return 0
 	}
 	return count
+}
+
+type Index struct {
+	Name       string
+	Definition string
+}
+
+func (d *PostgresService) ListIndex(tablename string) ([]map[string]string, error) {
+	var index []map[string]string
+	query := "select indexname, indexdef from pg_indexes where tablename = $1"
+
+	rows, err := d.db.Query(context.Background(), query, tablename)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tableIndex Index
+	for rows.Next() {
+		if err := rows.Scan(&tableIndex.Name, &tableIndex.Definition); err != nil {
+			continue
+		}
+
+		row := make(map[string]string)
+		row["index_name"] = tableIndex.Name
+		row["index_definition"] = tableIndex.Definition
+		index = append(index, row)
+	}
+
+	return index, nil
 }

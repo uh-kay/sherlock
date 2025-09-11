@@ -29,7 +29,7 @@ func Sidebar() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div id=\"sidebar\" class=\"flex flex-col p-2 text-xl items-start border-r dark:border-gray-200/50 dark:text-gray-200 h-full overflow-y-auto\"></div>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<div class=\"flex flex-col items-end justify-between h-full overflow-y-auto border-r dark:border-gray-200/50\"><div id=\"sidebar\" class=\"flex flex-col p-2 text-xl items-start dark:text-gray-200\"></div><div class=\"dark:text-white\"><button id=\"logout\" class=\"flex items-center gap-1 hover:bg-gray-100/25 p-2 mr-1 mb-1 rounded-full\"><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"m16 17 5-5-5-5\"></path><path d=\"M21 12H9\"></path><path d=\"M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4\"></path></svg></button></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

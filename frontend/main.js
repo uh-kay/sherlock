@@ -15,6 +15,7 @@ const minimizeButton = document.getElementById("minimize-btn");
 const dbInputElement = document.getElementById("db-input-div");
 const pgConnectErrorElement = document.getElementById("pg-connect-error");
 const pageControlElement = document.getElementById("page-control");
+const logoutButton = document.getElementById("logout");
 
 let currentTable = null;
 let offset = 0;
@@ -123,6 +124,7 @@ function showTableData(
   PostgresService.ListData(tablename, sortColumn, direction, offset)
     .then((data) => {
       tableElement.innerHTML = createTableHTML(data);
+      pageControlElement.classList.remove("hidden");
       updatePaginationElements(data);
       if (sortColumn) {
         const activeHeader = document.querySelector(
@@ -182,13 +184,46 @@ function showRowCount(tablename) {
 }
 
 function showTableStructure(tablename) {
-  PostgresService.ListStructure(tablename)
-    .then((structure) => {
-      tableElement.innerHTML = createStructureHTML(structure);
-    })
-    .catch((error) => {
-      tableElement.innerHTML = `<p class="text-red-600">Error loading structure: ${error.message}</p>`;
-    });
+  Promise.all([
+    PostgresService.ListStructure(tablename),
+    PostgresService.ListIndex(tablename),
+  ]).then(([structure, index]) => {
+    const structureHTML = createStructureHTML(structure);
+    const indexHTML = createIndexHTML(index);
+
+    pageControlElement.classList.toggle("hidden");
+
+    tableElement.innerHTML = `
+      <div>
+        ${structureHTML}
+        <div class="mt-4 dark:text-white text-md font-semibold">Indexes:</div>
+        ${indexHTML}
+      </div>
+      `;
+  });
+}
+
+function createIndexHTML(index) {
+  if (!index || index.length === 0) {
+    return '<p class="text-gray-600 dark:text-gray-300">No index information available</p>';
+  }
+
+  let html = `<table class="w-full border-collapse border border-gray-300">
+    <thead><tr>
+    <th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">index_name</th>
+    <th class="p-3 text-left border border-gray-200 font-medium dark:text-gray-200">index_definition</th>
+    </tr></thead>
+    <tbody>`;
+
+  index.forEach((column) => {
+    html += `<tr class="hover:bg-gray-50 dark:hover:bg-gray-50/25">
+      <td class="p-2 border border-gray-200 dark:text-gray-200">${column.index_name || ""}</td>
+      <td class="p-2 border border-gray-200 dark:text-gray-200">${column.index_definition || ""}</td>
+      </tr>`;
+  });
+
+  html += "</tbody></table>";
+  return html;
 }
 
 function createTableHTML(data) {
@@ -302,4 +337,9 @@ minimizeButton.addEventListener("click", () => {
   Window.ToggleMaximise();
   maximizeButton.classList.toggle("hidden");
   minimizeButton.classList.toggle("hidden");
+});
+
+logoutButton.addEventListener("click", () => {
+  PostgresService.Close();
+  window.location.href = "/index";
 });
